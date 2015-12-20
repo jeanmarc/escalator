@@ -9,6 +9,7 @@ import scala.collection.mutable.ArrayBuffer
   */
 object Reaper {
   case class WatchMe(ref:ActorRef)
+  case class SoulCount()
 }
 
 abstract class Reaper extends Actor {
@@ -20,6 +21,8 @@ abstract class Reaper extends Actor {
   def allSoulsReaped(): Unit
 
   final def receive = {
+    case SoulCount() =>
+      sender ! watching.size
     case WatchMe(ref) =>
       context.watch(ref)
       watching += ref

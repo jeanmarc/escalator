@@ -1,7 +1,12 @@
 package nl.about42.experiments
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import nl.about42.experiments.Reaper.WatchMe
+import akka.util.Timeout
+import akka.pattern.ask
+import nl.about42.experiments.Reaper.{SoulCount, WatchMe}
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 case object PingMessage
 case object PongMessage
@@ -19,7 +24,11 @@ case object StopMessage
   */
 class Ping(pong: ActorRef) extends Actor {
   var count = 0
-  def incrementAndPrint { count += 1; println("ping") }
+  def incrementAndPrint {
+    count += 1;
+    println("ping")
+  }
+
   def receive = {
     case StartMessage =>
       incrementAndPrint
@@ -52,6 +61,8 @@ class PingPongReaper extends Reaper{
     println("PingPongReaper has collected all souls, shutting down actor system")
     context.system.shutdown()
   }
+
+  def watchCount(): Int = watching.size
 }
 
 object PingPong extends App {
@@ -69,6 +80,7 @@ object PingPong extends App {
   ping ! StartMessage
 
   // now wait for the game to finish
+  Await.result(system.whenTerminated, 1 days)
 
   // this should be the last output of the application
   println("that's all folks!")
