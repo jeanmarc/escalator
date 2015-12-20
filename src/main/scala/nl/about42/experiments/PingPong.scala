@@ -59,7 +59,7 @@ class Pong extends Actor {
 class PingPongReaper extends Reaper{
   def allSoulsReaped(): Unit = {
     println("PingPongReaper has collected all souls, shutting down actor system")
-    context.system.shutdown()
+    context.system.terminate()
   }
 
   def watchCount(): Int = watching.size

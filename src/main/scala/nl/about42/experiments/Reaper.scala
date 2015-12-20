@@ -5,7 +5,13 @@ import akka.actor.{Terminated, Actor, ActorRef}
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Created by jml on 12/20/15.
+  * Abstract Actor class that watches over a population of actors and calls allSoulsReaped
+  * when all watched actors have died.
+  * Implementations of this class can take action based on that event. For instance by
+  * shutting down the entire actor system and stopping the application, or by performing some
+  * cleanup and then respawning the main actors.
+  *
+  * Created by Jean-Marc van Leerdam on 2015-12-20
   */
 object Reaper {
   case class WatchMe(ref:ActorRef)
