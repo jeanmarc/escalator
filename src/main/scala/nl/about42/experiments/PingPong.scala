@@ -1,9 +1,7 @@
 package nl.about42.experiments
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import akka.util.Timeout
-import akka.pattern.ask
-import nl.about42.experiments.Reaper.{SoulCount, WatchMe}
+import nl.about42.experiments.Reaper.WatchMe
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
