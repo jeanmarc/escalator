@@ -1,6 +1,7 @@
 package nl.about42.experiments
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import nl.about42.experiments.Reaper.WatchMe
 
 case object PingMessage
 case object PongMessage
@@ -46,10 +47,29 @@ class Pong extends Actor {
   }
 }
 
+class PingPongReaper extends Reaper{
+  def allSoulsReaped(): Unit = {
+    println("PingPongReaper has collected all souls, shutting down actor system")
+    context.system.shutdown()
+  }
+}
+
 object PingPong extends App {
+
   val system = ActorSystem("PingPongSystem")
   val pong = system.actorOf(Props[Pong], name = "pong")
   val ping = system.actorOf(Props(new Ping(pong)), name = "ping")
+
+  // setup some guardians to see how the game is doing
+  val reaper = system.actorOf(Props[PingPongReaper], name = "reaper")
+  reaper ! WatchMe(pong)
+  reaper ! WatchMe(ping)
+
   // start them going
   ping ! StartMessage
+
+  // now wait for the game to finish
+
+  // this should be the last output of the application
+  println("that's all folks!")
 }
