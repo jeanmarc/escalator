@@ -46,7 +46,7 @@ class Ping(pong: ActorRef) extends Actor {
 class Pong extends Actor {
   def receive = {
     case PingMessage =>
-      println("  pong")
+      println("    pong")
       sender ! PongMessage
     case StopMessage =>
       println("pong stopped")
