@@ -1,4 +1,6 @@
-import akka.actor.{Props, ActorSystem, ActorRef, Actor}
+package nl.about42.experiments
+
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 
 case object PingMessage
 case object PongMessage
