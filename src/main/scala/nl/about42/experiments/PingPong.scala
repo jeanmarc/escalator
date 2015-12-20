@@ -78,6 +78,7 @@ object PingPong extends App {
   ping ! StartMessage
 
   // now wait for the game to finish
+  println("enter waiting loop...")
   Await.result(system.whenTerminated, 1 days)
 
   // this should be the last output of the application
