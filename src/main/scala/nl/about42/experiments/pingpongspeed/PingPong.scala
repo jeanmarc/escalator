@@ -1,17 +1,18 @@
-package nl.about42.experiments
+package nl.about42.experiments.pingpongspeed
 
-import java.util.{Date, Calendar}
+import java.util.{Calendar, Date}
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import nl.about42.experiments.Reaper
 import nl.about42.experiments.Reaper.WatchMe
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-case object Ping2Message
-case object Pong2Message
-case object Start2Message
-case object Stop2Message
+case object PingMessage
+case object PongMessage
+case object StartMessage
+case object StopMessage
 
 /**
   * An Akka Actor example written by Alvin Alexander of
@@ -22,52 +23,52 @@ case object Stop2Message
   *
   * more akka info: <a href="http://doc.akka.io/docs/akka/snapshot/scala/actors.html" title="http://doc.akka.io/docs/akka/snapshot/scala/actors.html">http://doc.akka.io/docs/akka/snapshot/scala/actors.html</a>
   */
-class Ping2(pong: ActorRef, expiration: Date) extends Actor {
+class Ping(pong: ActorRef, expiration: Date) extends Actor {
   val expirationDate = expiration
   var count = 0
 
   def receive = {
-    case Start2Message =>
+    case StartMessage =>
       count += 1
-      pong ! Ping2Message
-    case Pong2Message =>
-      if (expirationDate.before(Calendar.getInstance().getTime())) {
-        sender ! Stop2Message
+      pong ! PingMessage
+    case PongMessage =>
+      if (count % 10000 == 0 && expirationDate.before(Calendar.getInstance().getTime())) {
+        sender ! StopMessage
         println(s"time's up, stopping after ${count} pingpongs")
         context.stop(self)
       } else {
         count += 1
-        sender ! Ping2Message
+        sender ! PingMessage
       }
   }
 }
 
-class Pong2 extends Actor {
+class Pong extends Actor {
   def receive = {
-    case Ping2Message =>
-      sender ! Pong2Message
-    case Stop2Message =>
-      println("pong2 stopped")
+    case PingMessage =>
+      sender ! PongMessage
+    case StopMessage =>
+      println("pong stopped")
       context.stop(self)
   }
 }
 
-class PingPong2Reaper extends Reaper{
+class PingPongReaper extends Reaper{
   def allSoulsReaped(): Unit = {
-    println("PingPong2Reaper has collected all souls, shutting down actor system")
+    println("PingPongReaper has collected all souls, shutting down actor system")
     context.system.terminate()
   }
 
   def watchCount(): Int = watching.size
 }
 
-object PingPong2 extends App {
+object PingPong extends App {
 
   val system = ActorSystem("PingPongSystem")
-  val pong = system.actorOf(Props[Pong2], name = "pong")
+  val pong = system.actorOf(Props[Pong], name = "pong")
   var endTime = Calendar.getInstance
     endTime.add(Calendar.SECOND, 10)
-  val ping = system.actorOf(Props(new Ping2(pong, endTime.getTime())), name = "ping")
+  val ping = system.actorOf(Props(new Ping(pong, endTime.getTime())), name = "ping")
 
   // setup some guardians to see how the game is doing
   val reaper = system.actorOf(Props[PingPongReaper], name = "reaper")
@@ -75,7 +76,7 @@ object PingPong2 extends App {
   reaper ! WatchMe(ping)
 
   // start them going
-  ping ! Start2Message
+  ping ! StartMessage
 
   // now wait for the game to finish
   println("enter waiting loop...")
