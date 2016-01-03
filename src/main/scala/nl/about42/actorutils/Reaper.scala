@@ -1,6 +1,6 @@
-package nl.about42.experiments
+package nl.about42.actorutils
 
-import akka.actor.{Terminated, Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, Terminated}
 
 import scala.collection.mutable.ArrayBuffer
 

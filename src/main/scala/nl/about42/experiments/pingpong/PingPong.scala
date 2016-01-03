@@ -1,8 +1,8 @@
 package nl.about42.experiments.pingpong
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import nl.about42.experiments.Reaper
-import nl.about42.experiments.Reaper.WatchMe
+import nl.about42.actorutils.Reaper
+import Reaper.WatchMe
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
