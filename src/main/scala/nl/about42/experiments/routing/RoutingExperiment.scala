@@ -23,6 +23,7 @@ class Handler( name: String) extends Actor {
       println( name + " processed message " + path)
       sender() ! SuccessfulMatch(name, path)
     }
+    case MatchMessage(path) => println( name + " did not match " + path)
     case _ => println(name + " ignored a message")
   }
 }
@@ -33,7 +34,8 @@ class Asker(name: String) extends Actor {
       list.foreach( matchers ! MatchMessage(_))
     }
     case SuccessfulMatch(handler, path) => println("got response from " + handler + " for message " + path)
-    case _ => println( "got an unexpected message")
+    case (s: String) => println( name + " got unexpected message " + s)
+    case a => println( name + " got an unknown message " + a)
   }
 }
 
@@ -74,8 +76,10 @@ object RoutingExperiment extends App {
   asker ! Questions(List("h1path", "h2path", "h1pathh2pathh3pathh4path", "nomatch", "h4path"), matcherPool)
 
   // now wait for the game to finish
-  println("enter waiting loop (1 minute)...")
-  Await.result(system.whenTerminated, 1 minute)
+  val duration: FiniteDuration = 30 seconds
+
+  println("enter waiting loop (" + duration + ")...")
+  Await.result(system.whenTerminated, duration)
 
   // this should be the last output of the application
   println("that's all folks!")
