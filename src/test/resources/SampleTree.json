@@ -1,0 +1,28 @@
+{
+  "name": "",
+  "children": [
+    {
+      "name": "apis",
+      "children": [
+        {
+          "name": "api",
+          "children": [
+            {
+              "name": "foobar",
+              "data": "{\"some\":\"data\"}",
+              "children":[{"name":"$instances"}]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "clusters",
+      "children": []
+    },
+    {
+      "name": "zookeeper",
+      "children": []
+    }
+  ]
+}

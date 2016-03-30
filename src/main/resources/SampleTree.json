@@ -1,0 +1,72 @@
+{
+  "apis": {
+    "api": {
+      "servicediscovery": {
+        "data": {
+          "environment": "DEV",
+          "contextRoot": "/api/servicediscovery",
+          "gateways": [
+            "STARGATE",
+            "NGINX",
+            "MOBILE-SECURITY-PROXY"
+          ],
+          "domainToContextRootMap": {
+            "all": "/api/servicediscovery"
+          },
+          "securityLevel": "1",
+          "encryptionEnabled": false,
+          "keepAlive": "/api/servicediscovery/keepalive",
+          "healthCheck": false,
+          "stateful": false,
+          "cacheContent": false,
+          "replaceErrorBodies": false,
+          "allowedHttpMethodList": [
+            "GET",
+            "PUT",
+            "POST",
+            "DELETE"
+          ],
+          "authentication": "NONE",
+          "ciName": "ServiceDiscoveryAPI",
+          "preferredLocalLoadBalancing": true
+        },
+        "children": [
+          "$instances"
+        ]
+      },
+      "foobar": {
+        "data": {
+          "environment": "DEV",
+          "contextRoot": "/api/foobar",
+          "gateways": [
+            "STARGATE",
+            "NGINX",
+            "MOBILE-SECURITY-PROXY"
+          ],
+          "domainToContextRootMap": {
+            "all": "/api/foobar"
+          },
+          "securityLevel": "1",
+          "encryptionEnabled": false,
+          "keepAlive": "/api/foobar/keepalive",
+          "healthCheck": false,
+          "stateful": false,
+          "cacheContent": false,
+          "replaceErrorBodies": false,
+          "allowedHttpMethodList": [
+            "GET",
+            "PUT",
+            "POST",
+            "DELETE"
+          ],
+          "authentication": "NONE",
+          "ciName": "FooBarAPI",
+          "preferredLocalLoadBalancing": true
+        },
+        "children": [
+          "$instances"
+        ]
+      }
+    }
+  }
+}
