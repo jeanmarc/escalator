@@ -1,6 +1,6 @@
 package nl.about42.experiments.routing
 
-import akka.actor.{ActorRef, Props, Actor, ActorSystem}
+import akka.actor._
 import akka.pattern.AskTimeoutException
 import akka.routing.{BroadcastGroup, ScatterGatherFirstCompletedGroup, ScatterGatherFirstCompletedPool}
 import nl.about42.actorutils.Reaper
@@ -26,7 +26,7 @@ class Handler( name: String) extends Actor {
       sender() ! SuccessfulMatch(name, path)
     }
     case MatchMessage(path) => println( name + " did not match " + path)
-    case _ => println(name + " ignored a message")
+    case m => println(s"$name ignored an unexpected message type (${m.getClass.getCanonicalName})")
   }
 }
 
@@ -78,6 +78,11 @@ object RoutingExperiment extends App {
   reaper ! WatchMe(matcherPool)
 
   asker ! Questions(List("h1path", "h2path", "h1pathh2pathh3pathh4path", "nomatch", "h4path"), matcherPool)
+
+  // send poison pills in 15 seconds
+  import system.dispatcher
+  system.scheduler.scheduleOnce(15 seconds, asker, PoisonPill)
+  system.scheduler.scheduleOnce(15 seconds, matcherPool, PoisonPill)
 
   // now wait for the game to finish
   val duration: FiniteDuration = 20 seconds
