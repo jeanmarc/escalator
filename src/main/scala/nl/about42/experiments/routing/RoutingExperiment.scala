@@ -19,33 +19,38 @@ case class Questions( questions: List[String], matchers: ActorRef)
 case class MatchMessage( path: String)
 case class SuccessfulMatch(handlerName: String, path: String)
 
+import RoutingExperiment.printmessage
+
 class Handler( name: String) extends Actor {
   def receive = {
     case MatchMessage(path) if path.contains(name) => {
-      println( name + " processed message " + path)
+      printmessage( name + " processed message " + path)
       sender() ! SuccessfulMatch(name, path)
     }
-    case MatchMessage(path) => println( name + " did not match " + path)
-    case m => println(s"$name ignored an unexpected message type (${m.getClass.getCanonicalName})")
+    case MatchMessage(path) => printmessage( name + " did not match " + path)
+    case m => printmessage(s"$name ignored an unexpected message type (${m.getClass.getCanonicalName})")
   }
 }
 
 class Asker(name: String) extends Actor {
   def receive = {
     case Questions(list, matchers) => {
-      list.foreach( matchers ! MatchMessage(_))
+      list.foreach(q => {
+        printmessage(s"$name asks $q")
+        matchers ! MatchMessage(q)
+      })
     }
-    case SuccessfulMatch(handler, path) => println(name + " got response from " + handler + " for message " + path)
-    case (s: String) => println( name + " got unexpected message " + s)
-    case Failure(e: AskTimeoutException) => println(name + " got a timeout for a question")
-    case a => println( name + " got an unknown message " + a)
-      println( "the class name is " + a.getClass.getCanonicalName)
+    case SuccessfulMatch(handler, path) => printmessage(name + " got response from " + handler + " for message " + path)
+    case (s: String) => printmessage( name + " got unexpected message " + s)
+    case Failure(e: AskTimeoutException) => printmessage(name + " got a timeout for a question")
+    case a => printmessage( name + " got an unknown message " + a)
+      printmessage( "the class name is " + a.getClass.getCanonicalName)
   }
 }
 
 class RoutingReaper extends Reaper{
   def allSoulsReaped(): Unit = {
-    println("RoutingReaper has collected all souls, shutting down actor system")
+    printmessage("RoutingReaper has collected all souls, shutting down actor system")
     context.system.terminate()
   }
 
@@ -53,6 +58,7 @@ class RoutingReaper extends Reaper{
 }
 
 object RoutingExperiment extends App {
+  val startTime = System.nanoTime()
   val system = ActorSystem("BroadcastMatcher")
 
   val asker = system.actorOf(Props(new Asker("oracle")), name = "asker")
@@ -67,7 +73,7 @@ object RoutingExperiment extends App {
   val matcherPaths = matchers.map( _.path.toString)
 
   // create a pool of Handlers that each watch for some matches (overlap allowed)
-  val matcherPool: ActorRef = system.actorOf(ScatterGatherFirstCompletedGroup(matcherPaths, within = 10.seconds).
+  val matcherPool: ActorRef = system.actorOf(ScatterGatherFirstCompletedGroup(matcherPaths, within = 1.seconds).
     props(), "matcherPool")
   //val matcherPool: ActorRef = system.actorOf(BroadcastGroup(matcherPaths).
   // props(), "matcherPool")
@@ -81,17 +87,22 @@ object RoutingExperiment extends App {
 
   // send poison pills in 15 seconds
   import system.dispatcher
-  system.scheduler.scheduleOnce(15 seconds, asker, PoisonPill)
-  system.scheduler.scheduleOnce(15 seconds, matcherPool, PoisonPill)
+  system.scheduler.scheduleOnce(5 seconds, asker, PoisonPill)
+  system.scheduler.scheduleOnce(5 seconds, matcherPool, PoisonPill)
 
   // now wait for the game to finish
-  val duration: FiniteDuration = 20 seconds
+  val duration: FiniteDuration = 10 seconds
 
-  println("enter waiting loop (" + duration + ")...")
+  printmessage("enter waiting loop (" + duration + ")...")
   Await.result(system.whenTerminated, duration)
 
   // this should be the last output of the application
-  println("that's all folks!")
+  printmessage("that's all folks!")
 
 
+  def printmessage(msg: String): Unit = {
+    val elapsed: Double = (System.nanoTime() - startTime) / 1000000.0
+    println(f"$elapsed%1.5f $msg")
+
+  }
 }
