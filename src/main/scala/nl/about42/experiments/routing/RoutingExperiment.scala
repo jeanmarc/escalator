@@ -1,12 +1,14 @@
 package nl.about42.experiments.routing
 
 import akka.actor.{ActorRef, Props, Actor, ActorSystem}
+import akka.pattern.AskTimeoutException
 import akka.routing.{BroadcastGroup, ScatterGatherFirstCompletedGroup, ScatterGatherFirstCompletedPool}
 import nl.about42.actorutils.Reaper
 import nl.about42.actorutils.Reaper.WatchMe
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import akka.actor.Status.Failure
 
 
 /**
@@ -33,9 +35,11 @@ class Asker(name: String) extends Actor {
     case Questions(list, matchers) => {
       list.foreach( matchers ! MatchMessage(_))
     }
-    case SuccessfulMatch(handler, path) => println("got response from " + handler + " for message " + path)
+    case SuccessfulMatch(handler, path) => println(name + " got response from " + handler + " for message " + path)
     case (s: String) => println( name + " got unexpected message " + s)
+    case Failure(e: AskTimeoutException) => println(name + " got a timeout for a question")
     case a => println( name + " got an unknown message " + a)
+      println( "the class name is " + a.getClass.getCanonicalName)
   }
 }
 
@@ -76,7 +80,7 @@ object RoutingExperiment extends App {
   asker ! Questions(List("h1path", "h2path", "h1pathh2pathh3pathh4path", "nomatch", "h4path"), matcherPool)
 
   // now wait for the game to finish
-  val duration: FiniteDuration = 30 seconds
+  val duration: FiniteDuration = 20 seconds
 
   println("enter waiting loop (" + duration + ")...")
   Await.result(system.whenTerminated, duration)
