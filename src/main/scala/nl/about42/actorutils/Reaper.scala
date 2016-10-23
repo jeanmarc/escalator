@@ -18,15 +18,25 @@ object Reaper {
   case class SoulCount()
 }
 
-abstract class Reaper extends Actor {
+/**
+  * Reaper is a trait to be added to Actors
+ */
+trait Reaper {
+  self: Actor =>
   import Reaper._
 
   val watching = ArrayBuffer.empty[ActorRef]
 
-  // this method is called when all actors in watching have died
-  def allSoulsReaped(): Unit
+  /**
+    * Method is called when all registered actors have died. Can be overridden if the default behaviour is
+    * not enough.
+    * Default behaviour is to terminate the actor system.
+    */
+  def allSoulsReaped(): Unit = {
+    context.system.terminate()
+  }
 
-  final def receive = {
+  final def receive: Receive = {
     case SoulCount() =>
       sender ! watching.size
     case WatchMe(ref) =>

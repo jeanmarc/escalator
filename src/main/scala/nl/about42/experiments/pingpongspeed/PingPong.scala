@@ -53,8 +53,8 @@ class Pong extends Actor {
   }
 }
 
-class PingPongReaper extends Reaper{
-  def allSoulsReaped(): Unit = {
+class PingPongReaper extends Actor with Reaper{
+  override def allSoulsReaped(): Unit = {
     println("PingPongReaper has collected all souls, shutting down actor system")
     context.system.terminate()
   }

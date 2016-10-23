@@ -42,14 +42,14 @@ class Asker(name: String) extends Actor {
     }
     case SuccessfulMatch(handler, path) => printmessage(name + " got response from " + handler + " for message " + path)
     case (s: String) => printmessage( name + " got unexpected message " + s)
-    case Failure(e: AskTimeoutException) => printmessage(name + " got a timeout for a question")
+    case Failure(e: AskTimeoutException) => printmessage(s"$name got a timeout for question ${e.getMessage}")
     case a => printmessage( name + " got an unknown message " + a)
       printmessage( "the class name is " + a.getClass.getCanonicalName)
   }
 }
 
-class RoutingReaper extends Reaper{
-  def allSoulsReaped(): Unit = {
+class RoutingReaper extends Actor with Reaper{
+  override def allSoulsReaped(): Unit = {
     printmessage("RoutingReaper has collected all souls, shutting down actor system")
     context.system.terminate()
   }
