@@ -5,12 +5,15 @@ package nl.about42.experiments.foodsl
   */
 
 object Farmer {
-  def apply(): Farmer = new Farmer
+
+  def Farmer = new Farmer()
+
+  implicit def farmerProducesFood( farmer: Farmer): Food = new Food(farmer.foodName, farmer.nutriValue, farmer.isVegetarian)
 
 }
 
 
-class Farmer(foodName: String = "", nutriValue: Double = 0.0, isVegetarian: Boolean = false) {
+case class Farmer(foodName: String = "", nutriValue: Double = 0.0, isVegetarian: Boolean = false) {
 
   def make(name: String) = new Farmer(name, nutriValue, isVegetarian)
 
@@ -18,8 +21,6 @@ class Farmer(foodName: String = "", nutriValue: Double = 0.0, isVegetarian: Bool
 
   def withEnergy( nutritionalValue: Double) = new Farmer(foodName, nutritionalValue, isVegetarian)
 
-  def apply(): Food = new Food(foodName, nutriValue, isVegetarian)
-
-  //implicit def farmerProducesFood( farmer: Farmer): Food = new Food(farmer.foodName, farmer.nutriValue, farmer.isVegetarian)
+  //def apply(): Food = new Food(foodName, nutriValue, isVegetarian)
 
 }
