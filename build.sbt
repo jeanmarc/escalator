@@ -2,7 +2,7 @@ name              := "eSCALAtor"
 
 version           := "0.01.01"
 
-scalaVersion      := "2.11.7"
+scalaVersion      := "2.11.8"
 
 resolvers         += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
 
